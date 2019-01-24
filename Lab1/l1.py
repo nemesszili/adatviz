@@ -1,3 +1,5 @@
+# Data source: rp5.ru -> archive
+
 # T - temperature
 # Po - pressure at weather station level
 # P - pressure at sea level
@@ -15,12 +17,17 @@
 # RRR - amount of precipitation in mm
 # sss - snow depth
 
+cityName = "moscow"
+
 arrayTime = [] #0
 arrayTemperature = [] #T1
 arrayPressure = [] #P3
 arrayHumidity = [] #U5
 arrayWindDirection = [] #DD6
 arrayWindSpeed = [] #FF7
+arrayMinTemp = [] #Tn14
+arrayMaxTemp = [] #Tx15
+arrayPrecipitation = [] #RRR23
 
 arrayWindDirectionNumbers = []
 
@@ -32,7 +39,7 @@ from windrose import WindroseAxes
 
 # Create layout
 axesTemperature = plt.subplot2grid((3,3),(0,0), colspan=2)
-axesHumidity = plt.subplot2grid((3,3), (1,0), colspan=2)
+axesPrecipitation = plt.subplot2grid((3,3), (1,0), colspan=2)
 axesPressure = plt.subplot2grid((3,3), (2,0), colspan=2)
 axesWindSpeed = plt.subplot2grid((3,3), (0,2))
 
@@ -41,12 +48,26 @@ axesWindDirection = WindroseAxes(plt.gcf(), list(ax.get_position().bounds))
 plt.gcf().add_axes(axesWindDirection)
 plt.gcf().delaxes(ax)
 
-def plotToAxis(ax, x, y, reversed=True):
-    dist = (max(y)-min(y))/10
-    ax.set_ylim([min(y)-dist, max(y)+dist])
+axesTemperature.set_ylabel("Temperature(C)")
+# axesTemperature.yaxis.labelpad = -5
+axesPrecipitation.set_ylabel("Precipitation(mm)")
+axesPressure.set_ylabel("Pressure(mmHg)")
+axesPressure.set_xlabel("Time(day.month)")
+axesWindSpeed.set_xlabel("Histogram of mean wind speed(m/s)")
+axesWindDirection.set_xlabel("Histogram of wind directions")
+axesTemperature.set_xlabel("Time(day.month)")
+axesPrecipitation.set_xlabel("Time(day.month)")
+
+def plotToAxis(ax, x, y, reversed=True, color=None, setLim=False, legend=None):
+    dist = (max(y)-min(y))/5
+    if setLim:
+    	ax.set_ylim([min(y), max(y)+dist])
     if reversed:
         y = y[::-1]
-    ax.plot(x, y)
+    if color:
+    	ax.plot(x, y, color=color)
+    else:
+    	ax.plot(x, y)
     # ax.yaxis.set_ticks(np.arange(min(y), max(y), 0.8))
 
 def movePlotAlongXAxis(ax, dist):
@@ -125,13 +146,25 @@ def readData(fileName):
         arrayHumidity.append(row[5])
         arrayWindDirection.append(row[6][22:])
         arrayWindDirectionNumbers.append(transformWindDirectionToNumber(row[6][22:]))
-        # if row[6][22:] != '' and transformWindDirectionToNumber(row[6][22:]) == -1:
-        #     print("!!!!!!" + row[6][22:])
-        # print(row[6][22:])
-        # print(transformWindDirectionToNumber(row[6][22:]))
+        if row[14] == "":
+        	arrayMinTemp.append(-999)
+        else:	
+        	arrayMinTemp.append(row[14])
+        if row[15] == "":
+        	arrayMaxTemp.append(-999)
+        else:	
+        	arrayMaxTemp.append(row[15])
+        if row[23] == "":
+        	arrayPrecipitation.append(-999)
+        elif row[23] == "No precipitation":
+        	arrayPrecipitation.append(0)
+        elif row[23] == "Trace of precipitation":
+        	arrayPrecipitation.append(-999)
+        else:
+        	arrayPrecipitation.append(row[23])
         arrayWindSpeed.append(row[7])
 
-readData('moscow.csv')
+readData(cityName + '.csv')
 arrayTime = arrayTime[::-1]
 
 # Transform data to numpy array
@@ -141,27 +174,42 @@ pressure = np.array(arrayPressure, dtype=np.dtype(float))
 humidity = np.array(arrayHumidity, dtype=np.dtype(float))
 windDirectionNumbers = np.array(arrayWindDirectionNumbers, dtype=np.dtype(float))
 windSpeed = np.array(arrayWindSpeed, dtype=np.dtype(float))
+minTemp = np.array(arrayMinTemp, dtype=np.dtype(float))
+maxTemp = np.array(arrayMaxTemp, dtype=np.dtype(float))
+precipitation = np.array(arrayPrecipitation, dtype=np.dtype(float))
 
 plotWindDirection(windDirectionNumbers)
-
-axes = []
-axes.append(axesTemperature)
-axes.append(axesHumidity)
-axes.append(axesPressure)
-
-data = []
-data.append(temperature)
-data.append(pressure)
-data.append(humidity)
 
 x = np.linspace(0, len(time), len(time)).T
 
 plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=.25, hspace=.5)
-for ax, d in zip(axes, data):
-    movePlotAlongXAxis(ax, -0.045)
-    plotToAxis(ax, x, d)
-    ax.xaxis.set_major_formatter(FuncFormatter(xaxisFormatter))
+movePlotAlongXAxis(axesTemperature, -0.045)
+plotToAxis(axesTemperature, x, temperature, color="goldenrod")
+axesTemperature.xaxis.set_major_formatter(FuncFormatter(xaxisFormatter))
+
+indexPrecipitationValues = precipitation != -999
+movePlotAlongXAxis(axesPrecipitation, -0.045)
+plotToAxis(axesPrecipitation, x[indexPrecipitationValues], precipitation[indexPrecipitationValues], setLim=True)
+axesPrecipitation.xaxis.set_major_formatter(FuncFormatter(xaxisFormatter))
+
+# movePlotAlongXAxis(axesPrecipitation, -0.045)
+# plotToAxis(axesPrecipitation, x, humidity)
+# axesPrecipitation.xaxis.set_major_formatter(FuncFormatter(xaxisFormatter))
+
+movePlotAlongXAxis(axesPressure, -0.045)
+plotToAxis(axesPressure, x, pressure)
+axesPressure.xaxis.set_major_formatter(FuncFormatter(xaxisFormatter))
 
 axesWindSpeed.hist(windSpeed)
+
+indexMinValues = minTemp != -999
+plotToAxis(axesTemperature, x[indexMinValues], minTemp[indexMinValues], color="blue")
+
+indexMaxValues = maxTemp != -999
+plotToAxis(axesTemperature, x[indexMaxValues], maxTemp[indexMaxValues], color="orangered")
+
+axesTemperature.legend(['Mean Temp', 'Min Temp', 'Max Temp'])
+
+plt.gcf().suptitle("Weather statistics for " + cityName.title())
 
 plt.show()
