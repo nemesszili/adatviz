@@ -16,7 +16,10 @@ def prepare_csv(csv_name):
     csv.replace(to_replace=r'Former.*', value='Macedonia', regex=True,inplace=True)
     csv['CODE'] = csv.apply(lambda row: country_name_to_country_code(row), axis=1)
     csv['Value'].replace(to_replace=r',', value='', regex=True, inplace=True)
+    csv['Value'].replace(to_replace=r': ', value='', regex=True, inplace=True)
+    csv['Category'] = csv[csv.columns[3]]
     csv.Value = pd.to_numeric(csv.Value, errors='coerce')
+    csv.Value = csv.Value.fillna(0)
     return csv
 
 population = prepare_csv('data/population.csv')
