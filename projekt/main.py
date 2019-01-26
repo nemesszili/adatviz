@@ -129,7 +129,7 @@ app.layout = html.Div(children=[
 											children=[
 												html.P(id='population'),
 												html.P(id='roads', style={'white-space': 'pre-line'}),
-												html.P(id='vehicleStock')
+												html.P(id='vehicleStock', style={'white-space': 'pre-line'})
 											])
 									])
 							])
