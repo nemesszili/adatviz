@@ -28,6 +28,3 @@ by_road_user = prepare_csv('data/1_by_road_user.csv')
 by_vehicle = prepare_csv('data/2_by_vehicle.csv')
 by_age = prepare_csv('data/3_by_age.csv')
 vehicle_stock = prepare_csv('data/vehicle_stock.csv')
-# print(by_road_user)
-
-# print(vehicle_stock)
