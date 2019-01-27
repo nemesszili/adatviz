@@ -24,8 +24,8 @@ app = dash.Dash(
 )
 
 layout = dict(
-	width = 700,
-	height = 700,
+	width = 650,
+	height = 650,
 	geo = dict(
 		resolution = '50',
 		scope = 'europe',
@@ -82,10 +82,11 @@ for cat in list(by_age['Category'].unique()):
 app.layout = html.Div(children=[
 	html.H1('Mortality statistics of Europe (2001-2016)', className='text-center', id='header'),
 
-	html.Div(className='row', children=[
-		html.Div(className='col-sm', children=[
+	html.Div(className='container', children=[
+		html.Div(className='row', children=[
+		html.Div(className='col-sm-7', children=[
 			html.Div(
-				style={'marginLeft': '50px', 'marginBottom': '20px', 'width': 600},
+				style={'marginLeft': '50px', 'marginBottom': '20px'},
 				children=[
 				html.Div('Select year: ', style={'width': '18rem'}),
 				dcc.Slider(
@@ -111,79 +112,73 @@ app.layout = html.Div(children=[
 			)
 		]),
 
-		html.Div(className='col-sm', children=[
-			html.Div(className='row', children=[
-				html.Div(
-					className='col-sm',
-					children=[
-						html.Div(
-							className='card',
-							children=[
-								html.Div('Country information', className='card-header'),
-								html.Div(
-									className='card-body text-left', 
-									children=[
-										html.H5(id='country', className='card-title'),
-										html.P(
-											className='card-text',
-											children=[
-												html.P(id='population'),
-												html.P(id='roads', style={'white-space': 'pre-line'}),
-												html.P(id='vehicleStock', style={'white-space': 'pre-line'})
-											])
-									])
-							])
-					]),
-				html.Div(
-					className='col-sm',
-					style={'marginLeft': '10px'},
-					children=[
-						html.Div(children=[
-							html.Div('Mortality by:', style={'width': '18rem'}),
-							dcc.Dropdown(
-								id='dataset',
-								style={'width': '18rem'},
-								options=[
-									{'label': 'Road user', 'value': 'by_road_user'},
-									{'label': 'Vehicle', 'value': 'by_vehicle'},
-									{'label': 'Age', 'value': 'by_age'},
-								],
-								value='by_road_user',
-							),
-						]),
-						html.Div(children=[
-							html.Div('Select category:', style={'width': '18rem'}),
-							dcc.Dropdown(
-								id='category',
-								style={'width': '18rem'},
-								options=categoryDropdownOptions['by_road_user'],
-								value=categoryDropdownOptions['by_road_user'][0]
-							),
-						]),
-						html.Div(children=[
-							html.Div('Unit:', style={'width': '18rem'}),
-							dcc.Dropdown(
-								id='unit',
-								style={'width': '18rem'},
-								options=[
-									{'label': 'Number', 'value': 'num'},
-									{'label': 'Per million inhabitants', 'value': 'million'}
-								],
-								value='num'
-							)
-						]),
-					]
-				),
-				html.Div(className='col-sm')
-			]),
-			html.Div(className='row', children=[
-				html.Div(className='col-sm', children=[
-					dcc.Graph(id='hist-comparison')
+		html.Div(className='col-sm-1', children=[]),
+		html.Div(className='col-sm-4', children=[
+			html.Div(className='container', children=[
+				html.Div(children=[
+					html.Div('Mortality by:'),
+					dcc.Dropdown(
+						id='dataset',
+						options=[
+							{'label': 'Road user', 'value': 'by_road_user'},
+							{'label': 'Vehicle', 'value': 'by_vehicle'},
+							{'label': 'Age', 'value': 'by_age'},
+						],
+						value='by_road_user',
+					),
 				]),
-			])
-		])
+				html.Div(children=[
+					html.Div('Select category:'),
+					dcc.Dropdown(
+						id='category',
+						options=categoryDropdownOptions['by_road_user'],
+						value=categoryDropdownOptions['by_road_user'][0]
+					),
+				]),
+				html.Div(children=[
+					html.Div('Unit:'),
+					dcc.Dropdown(
+						id='unit',
+						options=[
+							{'label': 'Number', 'value': 'num'},
+							{'label': 'Per million inhabitants', 'value': 'million'}
+						],
+						value='num'
+					)
+				]),
+				html.Div(className='row', children=[html.P(children=[])]),
+				html.Div(className='container', children=[
+					html.Div(className='row', children=[
+						html.Div(className='col-sm-12', children=[
+							html.Div(
+								className='card',
+								children=[
+									html.Div('Country information', className='card-header'),
+									html.Div(
+										className='card-body text-left', 
+										children=[
+											html.H5(id='country', className='card-title'),
+											html.P(
+												className='card-text',
+												children=[
+													html.P(id='population'),
+													html.P(id='roads', style={'white-space': 'pre-line'}),
+													html.P(id='vehicleStock', style={'white-space': 'pre-line'})
+												])
+									])
+							]),
+						]),
+					]),
+				]),
+			]),
+		]),		
 	]),
-
+	html.Div(className='row', children=[
+		html.Div(className='col-sm-12', children=[
+			dcc.Graph(id='hist-comparison')
+		]),
+	]),
+	]),
 	
 	html.Div(id='output-container')
 ])
