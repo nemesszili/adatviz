@@ -22,6 +22,7 @@ app = dash.Dash(
 	external_scripts=external_js,
 	external_stylesheets=external_css,
 )
+app.title = 'Traffic mortality'
 
 layout = dict(
 	width = 650,
@@ -80,7 +81,7 @@ for cat in list(by_age['Category'].unique()):
 	categoryDropdownOptions['by_age'].append({'label': cat, 'value': cat})
 
 app.layout = html.Div(children=[
-	html.H1('Mortality statistics of Europe (2001-2016)', className='text-center', id='header'),
+	html.H1('Traffic mortality statistics of Europe (2001-2016)', className='text-center', id='header'),
 
 	html.Div(className='container', children=[
 		html.Div(className='row', children=[
@@ -243,18 +244,10 @@ def map_hover4(hoverData, year):
 		hoverData = hoverData['points'][0]
 		country = hoverData['location']
 		val = int(vehicle_stock[(vehicle_stock['CODE'] == country) & (vehicle_stock['TIME'] == year)]['Value'].values[0])
-		pop = population[(population['CODE'] == country) & (population['TIME'] == year)]
-		if len(pop) > 1:
-			pop = pop.drop_duplicates(subset=['CODE'], keep='first')
-		pop = pop['Value']
-		pop /= 1e6
-		pop = float(pop.values[0])
 		if val > 0:
-			ret = "Vehicle Stock: " + str(val) + " 000\n"
-			if pop > 0:
-				ret += "Motoriaztion rate: %.2f" % (val / pop)
+			ret = "Vehicles per capita: " + str(val)
 		else:
-			ret = "Vehicle Stock: N/A"
+			ret = "Vehicles per capita: N/A"
 
 	return ret
 
